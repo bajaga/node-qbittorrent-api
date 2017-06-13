@@ -20,7 +20,7 @@ module.exports.connect = startSession;
  * @param {string=} password
  * @return {Object}
  */
-function startSession(host, username, password) {
+function startSession(host, username, password, callback) {
   if (!host) {
     host = "http://localhost:8080";
   }
@@ -34,8 +34,11 @@ function startSession(host, username, password) {
   if (username && password) {
     logIn(queue, username, password, function (error) {
       if (error) {
+        callback(error);
         throw error;
       }
+
+      callback(null);
     });
   }
   var cookies = new HashTable();
@@ -392,7 +395,14 @@ function getTorrentList(queue, filter, label, options, callback) {
       callback(error);
       return;
     }
-    var items = JSON.parse(body);
+
+    try {
+      var items = JSON.parse(body);
+    } catch(error) {
+      callback(error);
+      return;
+    }
+
     switch (filter) {
       case "seeding":
         items = items.filter(function (item) {
