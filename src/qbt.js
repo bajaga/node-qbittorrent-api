@@ -27,10 +27,13 @@ function startSession(host, username, password, callback) {
   else if (!host.startsWith("http")) {
     host = "http://" + host;
   }
+
   var queue = async.queue(function (req, callback) {
     req.url = host + req.url;
+    req.headers = {'Referer': host};
     request(req, callback);
   });
+
   if (username && password) {
     logIn(queue, username, password, function (error) {
       if (error) {
